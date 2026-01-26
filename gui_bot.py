@@ -1,32 +1,88 @@
 import tkinter as tk
-import subprocess
+import paramiko
 
-# ---------- Functions ----------
+# ---------- CONFIG ----------
+
+CLIENT_FILE = "clients.txt"
+SSH_USER = "labuser"   # CHANGE if needed
+SSH_TIMEOUT = 5
+
+# ---------- LOAD CLIENT IPS ----------
+
+def load_clients():
+    try:
+        with open(CLIENT_FILE, "r") as file:
+            clients = [line.strip() for line in file if line.strip()]
+        return clients
+    except FileNotFoundError:
+        return []
+
+CLIENTS = load_clients()
+
+# ---------- SSH EXECUTION FUNCTION ----------
+
+def run_remote_command(command):
+    output_data = ""
+
+    if not CLIENTS:
+        return "❌ No clients found in clients.txt"
+
+    for ip in CLIENTS:
+        try:
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+            ssh.connect(
+                hostname=ip,
+                username=SSH_USER,
+                timeout=SSH_TIMEOUT
+            )
+
+            stdin, stdout, stderr = ssh.exec_command(command)
+
+            out = stdout.read().decode()
+            err = stderr.read().decode()
+
+            ssh.close()
+
+            output_data += f"\n========== {ip} ==========\n"
+            output_data += out if out else err
+
+        except Exception as e:
+            output_data += f"\n========== {ip} ==========\nERROR: {str(e)}\n"
+
+    return output_data
+
+# ---------- BUTTON FUNCTIONS ----------
 
 def show_disk():
-    output = subprocess.getoutput("df -h")
+    output = run_remote_command("df -h")
     output_box.delete(1.0, tk.END)
     output_box.insert(tk.END, output)
 
 def cleanup():
-    subprocess.call("rm -rf /tmp/* ~/.cache/* ~/.local/share/Trash/files/*", shell=True)
+    cmd = "rm -rf /tmp/* ~/.cache/* ~/.local/share/Trash/files/*"
+    output = run_remote_command(cmd)
     output_box.delete(1.0, tk.END)
-    output_box.insert(tk.END, "✔ Cleanup completed successfully")
+    output_box.insert(tk.END, "✔ Cleanup completed\n" + output)
 
 def run_command():
     cmd = command_entry.get()
-    output = subprocess.getoutput(cmd)
+    if not cmd.strip():
+        return
+
+    output = run_remote_command(cmd)
     output_box.delete(1.0, tk.END)
     output_box.insert(tk.END, output)
 
-# ---------- Main Window ----------
+# ---------- GUI ----------
 
 root = tk.Tk()
-root.title("Linux Lab Command Bot")
+root.title("Linux Lab Command Bot (Centralized)")
 root.geometry("820x500")
 root.configure(bg="#1e1e2e")
 
-# ---------- Title ----------
+# ---------- TITLE ----------
 
 title = tk.Label(
     root,
@@ -37,15 +93,15 @@ title = tk.Label(
 )
 title.pack(pady=15)
 
-# ---------- Button Frame ----------
+# ---------- BUTTON FRAME ----------
 
 button_frame = tk.Frame(root, bg="#1e1e2e")
 button_frame.pack(pady=10)
 
 tk.Button(
     button_frame,
-    text="Disk Usage",
-    width=18,
+    text="Disk Usage (All PCs)",
+    width=20,
     bg="#4caf50",
     fg="white",
     font=("Arial", 11, "bold"),
@@ -54,19 +110,19 @@ tk.Button(
 
 tk.Button(
     button_frame,
-    text="Cleanup System",
-    width=18,
+    text="Cleanup All PCs",
+    width=20,
     bg="#e53935",
     fg="white",
     font=("Arial", 11, "bold"),
     command=cleanup
 ).grid(row=0, column=1, padx=10)
 
-# ---------- Command Input ----------
+# ---------- COMMAND INPUT ----------
 
 tk.Label(
     root,
-    text="Run Custom Command",
+    text="Run Command on All Lab PCs",
     bg="#1e1e2e",
     fg="white",
     font=("Arial", 12)
@@ -85,7 +141,7 @@ tk.Button(
     command=run_command
 ).pack(pady=10)
 
-# ---------- Output Box ----------
+# ---------- OUTPUT BOX ----------
 
 output_box = tk.Text(
     root,
