@@ -200,7 +200,17 @@ README.md LICENSE
 # Screenshots / Demo
 
 
+## Add Remote System
+![Add System](images/bot-4.png)
 
+## Disk Space
+![Disk Space](images/bot-1.png)
+
+## Cleanup Results
+![Cleanup Result](images/bot-3.png)
+
+## System Status
+![Disk Space](images/bot-2.png)
 ------------------------------------------------------------------------
 
 # Contributors
