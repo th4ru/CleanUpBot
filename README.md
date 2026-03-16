@@ -207,7 +207,7 @@ README.md LICENSE
 ![Disk Space](images/bot-1.png)
 
 ## Cleanup Results
-![Cleanup Result](images/bot-2.png)
+![Cleanup Result](images/bot-3.png)
 
 ## System Status
 ![Disk Space](images/bot-2.png)
