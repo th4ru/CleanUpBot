@@ -225,9 +225,9 @@ README.md LICENSE
 
 # Contact Information
 
-Name: Tharushi Dilhara
-Email: tharushidilhara881@gmail.com
-Institution: University of Jaffna
+- Name: Tharushi Dilhara
+- Email: tharushidilhara881@gmail.com
+- Institution: University of Jaffna
 
 ------------------------------------------------------------------------
 
