@@ -215,11 +215,11 @@ README.md LICENSE
 
 # Contributors
 
-Vinuki Samaraweera : System Design, Backend Development
-Bihari Fernando : Frontend Development
-Tharushi Dilhara :  Frontend Development 
-Manodya Wickramasinghe : Backend Development
-Malshi Wijesinghe : Backend Development
+- Vinuki Samaraweera : System Design, Backend Development
+- Bihari Fernando : Frontend Development
+- Tharushi Dilhara :  Frontend Development 
+- Manodya Wickramasinghe : Backend Development
+- Malshi Wijesinghe : Backend Development
 
 ------------------------------------------------------------------------
 
