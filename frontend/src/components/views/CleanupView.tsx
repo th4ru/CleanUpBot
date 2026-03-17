@@ -24,7 +24,7 @@ interface BackendCleanupOp {
   completedAt?: string;
 }
 
-const getBackendUrl = () => process.env.VITE_API_URL || 'http://localhost:5000/api';
+const getBackendUrl = () =>  'http://localhost:5000/api';
 
 async function fetchCleanupHistory(): Promise<CleanupLog[]> {
   try {

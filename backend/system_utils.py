@@ -46,35 +46,39 @@ class SystemInfoParser:
         return disks
     
     @staticmethod
-    def parse_memory_usage(free_output: str) -> Dict[str, str]:
-        """
-        Parse 'free -h' output
-        
-        Example output:
-                      total        used        free      shared  buff/cache   available
-        Mem:          15.5Gi       8.2Gi       2.1Gi       512Mi       5.2Gi       6.5Gi
-        
-        Returns:
-            Dictionary with memory information
-        """
+    def parse_memory_usage(free_output: str) -> Dict[str, float]:
         result = {}
+
         lines = free_output.strip().split('\n')
-        
+
         for line in lines:
             if 'Mem:' in line:
                 parts = line.split()
-                if len(parts) >= 6:
+
+                def clean_value(val):
+                    return float(re.sub(r'[A-Za-z]+', '', val))
+
+                try:
                     result = {
-                        'total': parts[1],
-                        'used': parts[2],
-                        'free': parts[3],
-                        'shared': parts[4],
-                        'buff_cache': parts[5],
-                        'available': parts[6] if len(parts) > 6 else parts[5]
+                        'total': clean_value(parts[1]),
+                        'used': clean_value(parts[2]),
+                        'free': clean_value(parts[3]),
+                        'shared': clean_value(parts[4]),
+                        'buff_cache': clean_value(parts[5]),
+                        'available': clean_value(parts[6]) if len(parts) > 6 else clean_value(parts[5])
                     }
-        
+                except:
+                    result = {
+                        'total': 0.0,
+                        'used': 0.0,
+                        'free': 0.0,
+                        'shared': 0.0,
+                        'buff_cache': 0.0,
+                        'available': 0.0
+                    }
+
         return result
-    
+
     @staticmethod
     def parse_uptime(uptime_output: str) -> Dict[str, Any]:
         """

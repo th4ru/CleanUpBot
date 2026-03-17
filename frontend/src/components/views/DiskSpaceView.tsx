@@ -25,7 +25,7 @@ interface BackendDiskInfo {
   mount_point: string;
 }
 
-const getBackendUrl = () => process.env.VITE_API_URL || 'http://localhost:5000/api';
+const getBackendUrl = () => 'http://localhost:5000/api';
 
 const getStatusFromPercent = (percent: number): 'healthy' | 'warning' | 'critical' => {
   if (percent >= 90) return 'critical';
