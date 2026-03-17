@@ -8,6 +8,7 @@ interface CleanupLog {
   action: string;
   spaceFreed: string;
   status: 'success' | 'running' | 'failed';
+  errorMessage?: string;
 }
 
 interface BackendSystemPC {
@@ -22,9 +23,18 @@ interface BackendCleanupOp {
   status: string;
   startedAt: string;
   completedAt?: string;
+  errorMessage?: string;
 }
 
 const getBackendUrl = () =>  'http://localhost:5000/api';
+
+const cleanupTypeLabel = (type: string) => {
+  if (type === 'all') return 'Full cleanup';
+  if (type === 'temp') return 'Temp cleanup';
+  if (type === 'logs') return 'Logs cleanup';
+  if (type === 'cache') return 'Cache cleanup';
+  return `${type} cleanup`;
+};
 
 async function fetchCleanupHistory(): Promise<CleanupLog[]> {
   try {
@@ -56,9 +66,10 @@ async function fetchCleanupHistory(): Promise<CleanupLog[]> {
         second: '2-digit',
       }),
       pcName: systemsMap.get(op.systemId) || `System ${op.systemId}`,
-      action: `${op.cleanupType} cleanup ${op.status}`,
+      action: `${cleanupTypeLabel(op.cleanupType)} ${op.status}`,
       spaceFreed: '...',
       status: op.status as 'success' | 'running' | 'failed',
+      errorMessage: op.errorMessage || undefined,
     }));
   } catch (error) {
     console.error('Error fetching cleanup history:', error);
@@ -138,7 +149,7 @@ function CleanupView() {
               second: '2-digit',
             }),
             pcName: systemName,
-            action: `Running ${op.cleanupType} cleanup...`,
+            action: `Running ${cleanupTypeLabel(op.cleanupType)}...`,
             spaceFreed: '...',
             status: 'running' as const,
           };
@@ -220,7 +231,7 @@ function CleanupView() {
             <option value="cache">Cache</option>
             <option value="temp">Temp Files</option>
             <option value="logs">Logs</option>
-            <option value="all">All</option>
+            <option value="all">Full cleanup (no size limits)</option>
           </select>
           <button
             onClick={handleStartCleanup}
@@ -335,6 +346,11 @@ function CleanupView() {
                         <span className="text-gray-500 text-sm">{log.timestamp}</span>
                       </div>
                       <p className={`text-sm ${getStatusColor(log.status)}`}>{log.action}</p>
+                      {log.status === 'failed' && log.errorMessage && (
+                        <p className="text-sm text-red-300 mt-1 whitespace-pre-wrap">
+                          {log.errorMessage}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="text-right">
