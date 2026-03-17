@@ -217,10 +217,7 @@ function CleanupView() {
             disabled={isRunning}
             className="px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 disabled:opacity-50"
           >
-            <option value="cache">Cache</option>
-            <option value="temp">Temp Files</option>
-            <option value="logs">Logs</option>
-            <option value="all">All</option>
+            <option value="all">Full Cleanup</option>
           </select>
           <button
             onClick={handleStartCleanup}

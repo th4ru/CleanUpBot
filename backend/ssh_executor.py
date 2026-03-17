@@ -110,6 +110,35 @@ class SSHExecutor:
         if self.client:
             self.client.close()
             logger.info(f"SSH connection closed to {self.hostname}")
+
+    def execute_script(self, script_path: str, args: str = "") -> Tuple[int, str, str]:
+        """
+        Upload and execute a local script on the remote system with sudo.
+        
+        Args:
+            script_path: Path to the local script file
+            args: Arguments to pass to the script
+            
+        Returns:
+            Tuple of (return_code, stdout, stderr)
+        """
+        if not self.client:
+            logger.error("SSH client not connected")
+            return 1, "", "SSH client not connected"
+            
+        try:
+            # Upload script
+            sftp = self.client.open_sftp()
+            remote_path = f"/tmp/uploaded_script_{id(self)}.sh"
+            sftp.put(script_path, remote_path)
+            sftp.close()
+            
+            # Make executable and run with sudo
+            command = f"chmod +x {remote_path} && sudo {remote_path} {args}; EXIT_CODE=$?; rm -f {remote_path}; exit $EXIT_CODE"
+            return self.execute_command(command)
+        except Exception as e:
+            logger.error(f"Error executing script on {self.hostname}: {str(e)}")
+            return 1, "", str(e)
     
     def __enter__(self):
         """Context manager entry"""

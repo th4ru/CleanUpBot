@@ -34,27 +34,30 @@ def execute_cleanup_async(operation_id, system_id, cleanup_type, executor_config
             return
         
         try:
-            commands = []
-            
-            if cleanup_type in ['cache', 'all']:
-                commands.append(CommandBuilder.clean_cache())
-            
-            if cleanup_type in ['temp', 'all']:
-                commands.append(CommandBuilder.clean_temp_files())
-            
-            if cleanup_type in ['logs', 'all']:
-                commands.append(CommandBuilder.clean_logs())
+            import os
+            # Get path to system_cleanup.sh
+            script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            script_path = os.path.join(script_dir, 'system_cleanup.sh')
             
             total_space_freed = 0
             errors = []
             
-            for command in commands:
-                return_code, stdout, stderr = executor.execute_command(command)
-                if return_code != 0:
-                    errors.append(f"Command failed: {stderr}")
+            return_code, stdout, stderr = executor.execute_script(script_path, args="--force")
+            if return_code != 0:
+                errors.append(f"Script failed: {stderr}")
             
-            operation.status = 'success'
-            operation.space_freed = total_space_freed
+            # Extract space freed from stdout if possible
+            import re
+            space_freed_match = re.search(r"Space freed:\s+(.*?)\s+\(", stdout)
+            
+            operation.status = 'failed' if errors else 'success'
+            operation.space_freed = str(total_space_freed)
+            if space_freed_match:
+                operation.space_freed = space_freed_match.group(1).strip()
+                
+            if errors:
+                operation.error_message = "; ".join(errors)
+                
             operation.completed_at = datetime.utcnow()
             
         except Exception as e:
