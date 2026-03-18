@@ -114,7 +114,7 @@ cd frontend
 
 Install dependencies:
 
-npm install
+sudo apt install npm
 
 Run the development server:
 
